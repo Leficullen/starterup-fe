@@ -14,7 +14,7 @@ const Navbar = () => {
           Shrimp Linkers
         </Link>
       </div>
-      <div>
+      <div className="flex md:hidden">
         <Link href="/">
           <Home width="30px" height="30px" className="text-primary"/>
         </Link>
