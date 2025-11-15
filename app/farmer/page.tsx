@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function FarmerDashboard() {
   return (
-    <div className="mx-30 my-20 to-accent p-10 rounded-2xl text-background shadow-lg border-2">
+    <div className="mx-30 my-20 to-accent p-10 rounded-2xl text-background shadow-lg border-2 mt-30">
       <div className="bg-linear-to-r from-primary to-accent px-5 py-3 rounded-md">
         <h1 className="text-2xl font-semibold text-background">
           Hello, Pak Hasan
@@ -14,7 +14,7 @@ export default function FarmerDashboard() {
 
       <div className="grid grid-cols-2 gap-4 mt-6">
         <Link href="/farmer/create-batch">
-          <Button className="bg-background shadow-lg  border-2 rounded-lg w-fit px-[20%] text-lg text-primary hover:text-background font-bold border-primary ">
+          <Button className="bg-background shadow-lg  border-2 rounded-lg w-fit px-[20%] text-lg text-primary hover:text-background hover:bg-primary font-bold border-primary ">
             + Create Batch
           </Button>
         </Link>
@@ -30,7 +30,7 @@ export default function FarmerDashboard() {
           <p>Pond: A3</p>
           <p>Weight: 180 kg</p>
           <Link href="/batch/BATCH-2025-001">
-            <Button variant="outline" className="w-full mt-3 ">
+            <Button className="w-full mt-3 ">
               View Details →
             </Button>
           </Link>
