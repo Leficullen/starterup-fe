@@ -7,101 +7,236 @@ import { useRouter } from "next/navigation";
 
 export default function ScannerPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [result, setResult] = useState("");
+  const scannerRef = useRef<QrScanner | null>(null);
+
+  // User session info
+  const [role, setRole] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [roleLoaded, setRoleLoaded] = useState(false);
+
+  // Scanner logic states
+  const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [role, setRole] = useState<any>(null);
 
-  const router = useRouter(); // <— ini baru
+  // UI toast message
+  const [uiMessage, setUiMessage] = useState<string | null>(null);
+  const [messageType, setMessageType] = useState<"success" | "error">(
+    "success"
+  );
 
-  //fetch role utk redirect anzay
-  useEffect (() =>{
+  const router = useRouter();
+
+  // ---------------------------------------------
+  // Load logged-in user before enabling scanner
+  // ---------------------------------------------
+  useEffect(() => {
     async function fetchRole() {
       try {
-        const res = await GET("/auth/me")
+        const res = await GET("/auth/me");
         const data = await res.json();
-        setRole(data.role)
-      } catch (err) {
-        console.log("Gagal load woi: ", err)
+
+        if (!res.ok || !data.user?.role || !data.user?.id) {
+          router.push("/login");
+          return;
+        }
+
+        setRole(data.user.role);
+        setUserId(data.user.id);
+        setRoleLoaded(true);
+      } catch {
+        router.push("/login");
       }
     }
-  })
 
-  useEffect(() => {
-    let scanner: QrScanner;
-
-    if (videoRef.current) {
-      scanner = new QrScanner(
-        videoRef.current,
-        async (result) => {
-          console.log("QR DETECTED:", result.data);
-          setResult(result.data);
-
-          // Fetch backend
-          try {
-            const res = await GET(`/batches/${result.data}`);
-            const batch = await res.json();
-
-            if (!res.ok) {
-              alert("Batch tidak ditemukan atau token invalid.");
-            } else {
-              // Simpan batch
-              let saved = JSON.parse(
-                localStorage.getItem("my_batches") || "[]"
-              );
-              saved.push(batch);
-              localStorage.setItem("my_batches", JSON.stringify(saved));
-
-              alert("Batch berhasil ditambahkan ke dashboard!");
-
-              // REDIRECT KE DASHBOARD
-              if (role) {
-                router.push(`/${role}`)
-              } else {
-                router.push("/")
-              }
-              
-              scanner.stop(); // optional: hentikan kamera
-              return;
-            }
-          } catch (err: any) {
-            alert("Error fetching batch: " + err.message);
-          }
-
-          // Reset result jika mau terus scan
-          setTimeout(() => setResult(""), 2000);
-        },
-        {
-          onDecodeError: () => {},
-          highlightScanRegion: true,
-        }
-      );
-
-      scanner.start().catch((err) => {
-        setError(`Camera error: ${err.message}`);
-      });
-    }
-
-    return () => {
-      scanner?.stop();
-    };
+    fetchRole();
   }, [router]);
 
-  return (
-    <div className=" flex flex-col max-h-screen items-center justify-center bg-background text-foreground p-4">
-      <h1 className="text-2xl font-bold mb-4 text-primary">Scan Batch</h1>
+  // Generate per-user localStorage key
+  function localKey() {
+    return `my_batches_${userId}`;
+  }
 
-      {error ? (
-        <p className="text-red-500">{error}</p>
-      ) : (
-        <video
-          ref={videoRef}
-          className=" object-cover rounded-lg border-4 border-primary"
-          playsInline
-          muted
-        />
+  // ---------------------------------------------
+  // Initialize QR Scanner after role & user loaded
+  // ---------------------------------------------
+  useEffect(() => {
+    if (!roleLoaded || !userId) return;
+    if (!videoRef.current || scannerRef.current) return;
+
+    const scanner = new QrScanner(
+      videoRef.current,
+      async (qr) => {
+        if (isProcessing) return;
+        setIsProcessing(true);
+
+        // Clean incoming QR text
+        let raw = qr.data.trim();
+
+        // Handle QuickChart format (...text=xxx)
+        if (raw.includes("text=")) raw = raw.split("text=")[1];
+
+        // Validate UUID format
+        const uuidRegex =
+          /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
+        if (!uuidRegex.test(raw)) {
+          showErrorMessage("Invalid Batch ID.");
+          setIsProcessing(false);
+          return;
+        }
+
+        // Fetch batch details
+        try {
+          const res = await GET(`/batches/${raw}`);
+          const json = await res.json();
+
+          if (!res.ok || !json.batch) {
+            showErrorMessage("Batch not found.");
+            setIsProcessing(false);
+            return;
+          }
+
+          const batch = json.batch;
+
+          // Per-user storage
+          const key = localKey();
+          const saved = JSON.parse(localStorage.getItem(key) || "[]");
+
+          // Check duplicate
+          const exists = saved.some((item: any) => item.id === batch.id);
+          if (exists) {
+            showErrorMessage("This batch has already been added.");
+            setIsProcessing(false);
+            return;
+          }
+
+          // Save batch
+          saved.push(batch);
+          localStorage.setItem(key, JSON.stringify(saved));
+
+          showSuccessMessage("Batch added successfully.");
+
+          // Stop camera before navigating
+          scanner.stop();
+          scannerRef.current = null;
+          router.push(`/${role}`);
+        } catch (err: any) {
+          showErrorMessage("Network error: " + err.message);
+        }
+
+        setIsProcessing(false);
+      },
+      {
+        highlightScanRegion: true,
+        onDecodeError: () => {}, // Ignore unstable frames
+      }
+    );
+
+    scanner.start().catch((err) => {
+      setError("Camera error: " + err.message);
+    });
+
+    scannerRef.current = scanner;
+
+    // Cleanup on unmount
+    return () => {
+      scannerRef.current?.stop();
+      scannerRef.current = null;
+    };
+  }, [roleLoaded, role, userId, isProcessing]);
+
+  // ---------------------------------------------
+  // Cancel button
+  // ---------------------------------------------
+  function handleCancel() {
+    scannerRef.current?.stop();
+    router.push(role ? `/${role}` : "/");
+  }
+
+  // ---------------------------------------------
+  // Toast message helpers
+  // ---------------------------------------------
+  function showSuccessMessage(msg: string) {
+    setMessageType("success");
+    setUiMessage(msg);
+    setTimeout(() => setUiMessage(null), 2000);
+  }
+
+  function showErrorMessage(msg: string) {
+    setMessageType("error");
+    setUiMessage(msg);
+    setTimeout(() => setUiMessage(null), 2000);
+  }
+
+  // ---------------------------------------------
+  // UI Rendering
+  // ---------------------------------------------
+  return (
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
+      {/* Toast Modal */}
+      {uiMessage && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div
+            className={`${
+              messageType === "success" ? "bg-green-500" : "bg-red-500"
+            } rounded-lg shadow-xl px-6 py-5 text-center max-w-sm mx-auto`}
+          >
+            <p className="text-background text-lg">{uiMessage}</p>
+          </div>
+        </div>
       )}
 
-      <p className="mt-4">{result || "Point the camera at the QR code"}</p>
+      {/* Header */}
+      <header className="flex items-center gap-3 px-4 py-3 border-b bg-card/80 backdrop-blur">
+        <button
+          onClick={handleCancel}
+          className="flex items-center justify-center h-9 w-9 rounded-full border hover:bg-accent transition"
+        >
+          ←
+        </button>
+
+        <div className="flex flex-col">
+          <span className="font-semibold text-sm">Scan Batch</span>
+          <span className="text-xs text-muted-foreground">
+            {roleLoaded ? `Logged in as ${role}` : "Loading..."}
+          </span>
+        </div>
+      </header>
+
+      {/* Main Section */}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
+        <div className="relative w-full max-w-md flex flex-col items-center gap-4">
+          {/* Camera Box */}
+          <div className="relative w-full aspect-3/4 max-w-xs rounded-2xl border-4 border-primary/70 overflow-hidden shadow-lg bg-black/40">
+            {error ? (
+              <div className="flex items-center justify-center h-full text-red-500 text-sm px-3 text-center">
+                {error}
+              </div>
+            ) : (
+              <video
+                ref={videoRef}
+                className="h-full w-full object-cover"
+                playsInline
+                muted
+              />
+            )}
+
+            {isProcessing && (
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center gap-2 text-white">
+                <div className="h-6 w-6 rounded-full border-2 border-white/40 border-t-transparent animate-spin" />
+                <span>Processing...</span>
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={handleCancel}
+            className="px-4 py-2 rounded-full border border-red-500 text-red-600 text-sm hover:bg-red-500/10 transition"
+          >
+            Cancel
+          </button>
+        </div>
+      </main>
     </div>
   );
 }
