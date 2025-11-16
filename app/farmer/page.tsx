@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import FarmerCard from "@/components/ui/farmerCard";
 
 export default function FarmerDashboard() {
   return (
@@ -21,21 +21,12 @@ export default function FarmerDashboard() {
       </div>
 
       <h2 className="text-xl font-semibold mt-6 mb-2 text-foreground">Your Batches</h2>
-
-      <Card className="bg-white md:w-[30%] border-zinc-400/40 border-4 mb-4 hover:border-primary/50 smooth">
-        <CardHeader>
-          <CardTitle>BATCH-2025-001</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-1">
-          <p>Pond: A3</p>
-          <p>Weight: 180 kg</p>
-          <Link href="/batch/BATCH-2025-001">
-            <Button className="w-full mt-3 ring-primary ring-2 ">
-              View Details →
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FarmerCard batchCode="SIGMA-24-25" date="18/11/2025" location="90 90" />
+        <FarmerCard />
+        <FarmerCard />
+        <FarmerCard />
+      </div>
     </div>
   );
 }
