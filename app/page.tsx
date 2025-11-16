@@ -95,7 +95,7 @@ export default function Home() {
           <div className="bg-red-200/80 p-5 border-2 border-red-500 rounded-md shadow-lg">
             <h3 className="justify-center md:justify-start w-full text-xl md:text-2xl font-bold text-red-500/70 flex items-center gap-2">
               <div className="rounded-full bg-red-300 p-2">
-                <AlertTriangle className="w-5 h-5 md:h-7 md:w-7"  />
+                <AlertTriangle className="w-5 h-5 md:h-7 md:w-7" />
               </div>
               Problems
             </h3>
@@ -110,7 +110,7 @@ export default function Home() {
           <div className="bg-green-200/80 p-5 border-2 border-green-500 rounded-md shadow-lg md:mt-0 mt-10 h-full">
             <h3 className="justify-center md:justify-start w-full text-xl md:text-2xl font-bold text-green-500 flex items-center gap-2">
               <div className="rounded-full bg-green-300 p-2">
-                <CheckIcon className="w-5 h-5 md:h-7 md:w-7"  />
+                <CheckIcon className="w-5 h-5 md:h-7 md:w-7" />
               </div>
               Solutions
             </h3>
@@ -122,7 +122,7 @@ export default function Home() {
               </ul>
             </div>
           </div>
-          
+
         </div>
       </div>
 
@@ -135,9 +135,8 @@ export default function Home() {
         </h2>
       </div> */}
 
-      <div className="w-full flex justify-center  py-16 mt-30">
+      <div className="w-full flex justify-center  py-16 mt-30 mb-20">
         <div className="max-w-5xl w-full px-4 md:px-8 relative">
-          {/* Title */}
           <h2 className="text-2xl md:text-4xl font-bold leading-tight text-center mb-30">
             The workflow of{" "}
             <span className="bg-linear-to-r from-primary to-accent text-transparent bg-clip-text">
@@ -148,7 +147,6 @@ export default function Home() {
           {/* Garis di tengah */}
           <div className="pointer-events-none absolute left-1/2 top-24 bottom-0 -translate-x-1/2 border-l border-gray-300" />
 
-          {/* Timeline items */}
           <div className="space-y-20 relative">
             {timelineItems.map((item, index) => {
               const cardOnRight = index % 2 === 0; // true = card di kanan, date di kiri
@@ -158,15 +156,12 @@ export default function Home() {
                   key={item.role}
                   className="grid grid-cols-[1fr_auto_1fr] items-center gap-5 md:gap-10"
                 >
-                  {/* KIRI */}
                   <div className="flex justify-end">
                     {cardOnRight ? (
-                      // Date pill (kiri)
                       <div className="bg-primary text-white text-sm md:text-base px-5 py-3 rounded-full shadow-md">
                         {item.role}
                       </div>
                     ) : (
-                      // Card (kiri)
                       <div className="bg-white rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] px-6 py-6 md:px-8 md:py-7 max-w-xl w-full">
                         <h3 className="text-primary font-semibold text-lg md:text-xl">
                           {item.title}{" "}
@@ -174,18 +169,16 @@ export default function Home() {
                         <p className="text-gray-600 mt-3 text-sm md:text-base">
                           {item.description}
                         </p>
-                       
+
                       </div>
                     )}
                   </div>
 
-                  {/* TENGAH: DOT */}
                   <div className="flex justify-center">
                     <div className="w-5 h-5 bg-accent rounded-full z-10 animate-ping " />
                     <div className="absolute w-5 h-5 bg-primary rounded-full z-10 animate " />
                   </div>
 
-                  {/* KANAN */}
                   <div className="flex justify-start">
                     {cardOnRight ? (
                       // Card (kanan)
@@ -196,10 +189,9 @@ export default function Home() {
                         <p className="text-gray-600 mt-3 text-sm md:text-base">
                           {item.description}
                         </p>
-                      
+
                       </div>
                     ) : (
-                      // Date pill (kanan)
                       <div className="bg-primary text-white text-sm md:text-base px-5 py-3 rounded-full shadow-md">
                         {item.role}
                       </div>
