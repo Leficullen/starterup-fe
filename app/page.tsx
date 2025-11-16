@@ -95,7 +95,7 @@ export default function Home() {
           <div className="bg-red-200/80 p-5 border-2 border-red-500 rounded-md shadow-lg">
             <h3 className="justify-center md:justify-start w-full text-xl md:text-2xl font-bold text-red-500/70 flex items-center gap-2">
               <div className="rounded-full bg-red-300 p-2">
-                <AlertTriangle className="w-5 h-5 md:h-7 md:w-7"  />
+                <AlertTriangle className="w-5 h-5 md:h-7 md:w-7" />
               </div>
               Problems
             </h3>
@@ -110,7 +110,7 @@ export default function Home() {
           <div className="bg-green-200/80 p-5 border-2 border-green-500 rounded-md shadow-lg md:mt-0 mt-10 h-full">
             <h3 className="justify-center md:justify-start w-full text-xl md:text-2xl font-bold text-green-500 flex items-center gap-2">
               <div className="rounded-full bg-green-300 p-2">
-                <CheckIcon className="w-5 h-5 md:h-7 md:w-7"  />
+                <CheckIcon className="w-5 h-5 md:h-7 md:w-7" />
               </div>
               Solutions
             </h3>
@@ -122,7 +122,7 @@ export default function Home() {
               </ul>
             </div>
           </div>
-          
+
         </div>
       </div>
 
@@ -169,7 +169,7 @@ export default function Home() {
                         <p className="text-gray-600 mt-3 text-sm md:text-base">
                           {item.description}
                         </p>
-                       
+
                       </div>
                     )}
                   </div>
@@ -189,7 +189,7 @@ export default function Home() {
                         <p className="text-gray-600 mt-3 text-sm md:text-base">
                           {item.description}
                         </p>
-                      
+
                       </div>
                     ) : (
                       <div className="bg-primary text-white text-sm md:text-base px-5 py-3 rounded-full shadow-md">
