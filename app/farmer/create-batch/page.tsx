@@ -11,6 +11,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 //   SelectTrigger,
 //   SelectValue,
 // } from "@/components/ui/select"
+import { GET } from "@/lib/api";
 
 export default function CreateBatch() {
   // Date in dd/mm/yyyy format (text input that inserts slashes)
@@ -102,6 +103,8 @@ export default function CreateBatch() {
     // eslint-disable-next-line no-console
     console.log("Generate batch", { dateCaught, lat, lng });
   }
+
+  console.log(GET("/batches"));
 
   return (
     <div className="p-6 max-w-md mx-auto min-h-screen flex items-center flex-col justify-center">
