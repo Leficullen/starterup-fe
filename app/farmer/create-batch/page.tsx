@@ -4,6 +4,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select"
 
 export default function CreateBatch() {
   // Date in dd/mm/yyyy format (text input that inserts slashes)
@@ -97,73 +104,75 @@ export default function CreateBatch() {
   }
 
   return (
-    <div className="p-6 max-w-md mx-auto text-white min-h-screen">
+    <div className="p-6 max-w-md mx-auto min-h-screen flex items-center flex-col justify-center">
       <h1 className="text-2xl font-semibold">Create New Batch</h1>
-
-      <Card className="mt-4 bg-white/10 border-white/20 backdrop-blur-xl">
-        <CardHeader>
-          <CardTitle>Batch Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Date Caught (dd/mm/yyyy) */}
-          <div>
-            <Input
-              placeholder="dd/mm/yyyy"
-              className="bg-white/20"
-              value={dateCaught}
-              aria-invalid={errors.date ? "true" : undefined}
-              onChange={(e) => setDateCaught(formatDateInput((e.target as HTMLInputElement).value))}
-            />
-            {errors.date && (
-              <div className="text-sm text-destructive mt-1">{errors.date}</div>
-            )}
-          </div>
-
-          {/* Latitude & Longitude (manual or auto) */}
-          <div>
-            <div className="grid grid-cols-2 gap-2">
+      <div className="lg:flex lg:items-center">
+        <Card className="mt-4 bg-white/10 border-white/20 backdrop-blur-xl">
+          <CardHeader>
+            <CardTitle>Batch Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Date Caught (dd/mm/yyyy) */}
+            <div>
               <Input
-                placeholder="Latitude"
-                type="number"
-                step="any"
+                placeholder="dd/mm/yyyy"
                 className="bg-white/20"
-                value={lat}
-                aria-invalid={errors.coords ? "true" : undefined}
-                onChange={(e) => setLat((e.target as HTMLInputElement).value)}
+                value={dateCaught}
+                aria-invalid={errors.date ? "true" : undefined}
+                onChange={(e) => setDateCaught(formatDateInput((e.target as HTMLInputElement).value))}
               />
-              <Input
-                placeholder="Longitude"
-                type="number"
-                step="any"
-                className="bg-white/20"
-                value={lng}
-                aria-invalid={errors.coords ? "true" : undefined}
-                onChange={(e) => setLng((e.target as HTMLInputElement).value)}
-              />
-            </div>
-            {errors.coords && (
-              <div className="text-sm text-destructive mt-1">{errors.coords}</div>
-            )}
-          </div>
-
-          <div className="flex gap-2 items-center">
-            <Button type="button" onClick={requestLocation} className="mt-2">
-              Use My Location
-            </Button>
-            <div className="flex-1 text-sm text-white/80 pl-2">
-              {lat && lng ? (
-                <span>Current: {lat}, {lng}</span>
-              ) : (
-                <span className="text-sm text-muted-foreground">No coordinates</span>
+              {errors.date && (
+                <div className="text-sm text-destructive mt-1">{errors.date}</div>
               )}
             </div>
-          </div>
 
-          {locationError && <div className="text-sm text-destructive mt-2">{locationError}</div>}
+            {/* Latitude & Longitude (manual or auto) */}
+            <div>
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  placeholder="Latitude"
+                  type="number"
+                  step="any"
+                  className="bg-white/20"
+                  value={lat}
+                  aria-invalid={errors.coords ? "true" : undefined}
+                  onChange={(e) => setLat((e.target as HTMLInputElement).value)}
+                />
+                <Input
+                  placeholder="Longitude"
+                  type="number"
+                  step="any"
+                  className="bg-white/20"
+                  value={lng}
+                  aria-invalid={errors.coords ? "true" : undefined}
+                  onChange={(e) => setLng((e.target as HTMLInputElement).value)}
+                />
+              </div>
+              {errors.coords && (
+                <div className="text-sm text-destructive mt-1">{errors.coords}</div>
+              )}
+            </div>
 
-          <Button className="w-full" onClick={handleGenerate}>Generate Batch + QR</Button>
-        </CardContent>
-      </Card>
+            <div className="flex gap-2 items-center">
+              <Button type="button" onClick={requestLocation} className="mt-2">
+                Use My Location
+              </Button>
+              <div className="flex-1 text-sm text-white/80 pl-2">
+                {lat && lng ? (
+                  <span>Current: {lat}, {lng}</span>
+                ) : (
+                  <span className="text-sm text-muted-foreground">No coordinates</span>
+                )}
+              </div>
+            </div>
+
+            {locationError && <div className="text-sm text-destructive mt-2">{locationError}</div>}
+
+            <Button className="w-full" onClick={handleGenerate}>Generate Batch + QR</Button>
+          </CardContent>
+        </Card>
+      </div>
+
     </div>
   );
 }
