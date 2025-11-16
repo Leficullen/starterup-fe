@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export default function ClientLayout({
   children,
@@ -19,6 +20,7 @@ export default function ClientLayout({
     <>
       {showNavbar && <Navbar />}
       {children}
+      <Footer/>
     </>
   );
 }

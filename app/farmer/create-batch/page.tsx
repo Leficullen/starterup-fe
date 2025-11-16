@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export default function CreateBatch() {
   return (
-    <div className="p-6 max-w-md mx-auto text-white">
+    <div className="p-6 max-w-md mx-auto text-white min-h-screen">
       <h1 className="text-2xl font-semibold">Create New Batch</h1>
 
       <Card className="mt-4 bg-white/10 border-white/20 backdrop-blur-xl">

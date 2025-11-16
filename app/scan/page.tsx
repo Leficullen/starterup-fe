@@ -59,15 +59,15 @@ export default function ScannerPage() {
               } else {
                 router.push("/")
               }
-              
-              scanner.stop(); // optional: hentikan kamera
+
+              scanner.stop(); 
               return;
             }
           } catch (err: any) {
             alert("Error fetching batch: " + err.message);
           }
 
-          // Reset result jika mau terus scan
+          // Reset result kalau mau terus scan
           setTimeout(() => setResult(""), 2000);
         },
         {
