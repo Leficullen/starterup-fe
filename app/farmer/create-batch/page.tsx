@@ -12,7 +12,7 @@ export default function CreateBatch() {
       <Card className="mt-4 bg-white/10 border-white/20 backdrop-blur-xl">
         <CardHeader>
           <CardTitle>Batch Information</CardTitle>
-        </CardHeader>   
+        </CardHeader>
         <CardContent className="space-y-4">
           <Input placeholder="Pond ID" className="bg-white/20 text-white" />
           <Input
@@ -20,7 +20,7 @@ export default function CreateBatch() {
             type="number"
             className="bg-white/20 text-white"
           />
-
+          {/* GENERATE QR */}
           <Button className="w-full">Generate Batch + QR</Button>
         </CardContent>
       </Card>

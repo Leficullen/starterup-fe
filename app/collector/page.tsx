@@ -4,9 +4,44 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
+import { getMe } from "@/lib/api";
 
 export default function CollectorDashboard() {
+  const [loading, setLoading] = useState(true);
+  const [me, setMe] = useState<any>(null);
   const [batches, setBatches] = useState<any[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    let isMounted = true;
+    async function load() {
+      try {
+        const profile = await getMe();
+        if (!isMounted) return;
+        if (!profile || !profile.role) {
+          router.push("/");
+          return;
+        }
+
+        const role = (profile.role || "").toLowerCase();
+        if (role !== "collector") {
+          const dest = role === "exporter" ? "/exporter" : `/${role}`;
+          router.push(dest);
+          return;
+        }
+        setMe(profile);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error loading profile:", error);
+        router.push("/");
+      }
+    }
+    load();
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
 
   // Load scanned batches from localStorage
   useEffect(() => {
@@ -14,9 +49,11 @@ export default function CollectorDashboard() {
     setBatches(saved);
   }, []);
 
+  if (loading) return <div className="text-black text-4xl">Loading...</div>;
+
   return (
     <div className="p-6 max-w-md mx-auto text-white">
-      <h1 className="text-2xl font-semibold">Welcome, Collector Arif</h1>
+      <h1 className="text-2xl font-semibold">Welcome, Collector {me?.email}</h1>
       <p className="text-white/60 -mt-2">Role: Collector</p>
 
       {/* Main Actions */}

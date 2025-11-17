@@ -1,8 +1,48 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
+import { getMe } from "@/lib/api";
 
 export default function ProcessorDashboard() {
+  const [loading, setLoading] = useState(true);
+  const [me, setMe] = useState<any>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    let isMounted = true;
+    async function load() {
+      try {
+        const profile = await getMe();
+        if (!isMounted) return;
+        if (!profile || !profile.role) {
+          router.push("/");
+          return;
+        }
+
+        const role = (profile.role || "").toLowerCase();
+        if (role !== "processor") {
+          const dest = role === "exporter" ? "/exporter" : `/${role}`;
+          router.push(dest);
+          return;
+        }
+        setMe(profile);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error loading profile:", error);
+        router.push("/");
+      }
+    }
+    load();
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
+
+  if (loading) return <div className="text-black text-4xl">Loading...</div>;
   return (
     <div className="p-6 max-w-md mx-auto text-white">
       <h1 className="text-2xl font-semibold">Hello, IndoShrimp Plant</h1>

@@ -1,8 +1,48 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getMe } from "@/lib/api";
 
 export default function FarmerDashboard() {
+  // const [loading, setLoading] = useState(true);
+  // const [me, setMe] = useState<any>(null);
+  // const router = useRouter();
+
+  // useEffect(() => {
+  //   let isMounted = true;
+  //   async function load() {
+  //     try {
+  //       const profile = await getMe();
+  //       if (!isMounted) return;
+  //       if (!profile || !profile.role) {
+  //         router.push("/");
+  //         return;
+  //       }
+
+  //       const role = (profile.role || "").toLowerCase();
+  //       if (role !== "farmer") {
+  //         const dest = role === "exporter" ? "/exporter" : `/${role}`;
+  //         router.push(dest);
+  //         return;
+  //       }
+  //       setMe(profile);
+  //       setLoading(false);
+  //     } catch (error) {
+  //       console.error("Error loading profile:", error);
+  //       router.push("/");
+  //     }
+  //   }
+  //   load();
+  //   return () => {
+  //     isMounted = false;
+  //   };
+  // }, [router]);
+
+  // if (loading) return <div className="text-black texl-4xl">Loading...</div>;
+
   return (
     <div className="mx-[5%] my-20 to-accent md:p-[2%] p-[3%] rounded-2xl text-background shadow-lg border-2 mt-30">
       <div className="bg-linear-to-r from-primary to-accent px-[3%] md:px-[1%] py-3 rounded-md">
@@ -20,7 +60,9 @@ export default function FarmerDashboard() {
         </Link>
       </div>
 
-      <h2 className="text-xl font-semibold mt-6 mb-2 text-foreground">Your Batches</h2>
+      <h2 className="text-xl font-semibold mt-6 mb-2 text-foreground">
+        Your Batches
+      </h2>
 
       <Card className="bg-white md:w-[30%] border-zinc-400/40 border-4 mb-4 hover:border-primary/50 smooth">
         <CardHeader>
