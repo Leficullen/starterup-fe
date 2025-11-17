@@ -30,9 +30,12 @@ export default function BatchTimeline() {
 
   useEffect(() => {
     const fetchData = async () => {
+      const res0 = await GET(`/batches/${id}`);
+      const data0 = await res0.json()
       const res = await GET(`/batches/${id}/history`);
       const data = await res.json()
       console.log(data)
+      console.log(data0.batch.latest_event)
 
       setBatch(data.events);
     }
@@ -40,7 +43,8 @@ export default function BatchTimeline() {
   }, [])  //set batch later 
 
   useEffect(() => {
-    console.log(batch)}
+    //console.log(batch)
+    }
     ,
     [batch] 
   )
@@ -54,6 +58,38 @@ export default function BatchTimeline() {
   //make different status badges (completed state, and )
   //make an event so that when something is completed then the stuff will change the appearance
   //do I need another fetch request for just the batches id for latest event?
+  const renderRoleContent = (item: any) => {
+    switch (item.actor_role?.toLowerCase()) {
+      case "exporter":
+        return (
+          <>
+            <p>Status: {item.payload.metadata?.statusExporter}</p>
+            <p>Spec file: {item.payload.metadata?.specName}</p>
+          </>
+        );
+
+      case "collector":
+        return (
+          <>
+            <p>Weight: {item.payload.metadata?.weight}</p>
+            <p>Status: {item.payload.metadata?.statusCollector}</p>
+            <p>Photo file: {item.payload.metadata?.photoName}</p>
+          </>
+        );
+
+      case "processor":
+        return (
+          <>
+            <p>Status: {item.payload.metadata?.statusProcessor}</p>
+            <p>Certificate: {item.payload.metadata?.certificateName}</p>
+          </>
+        );
+
+      default:
+        return;
+    }
+  };
+
 
 
   return (
@@ -66,7 +102,7 @@ export default function BatchTimeline() {
       {/* Container */}
       <div className="bg-background/20 via-primary to-accent backdrop-blur-xl p-6 rounded-2xl shadow-xl w-full max-w-md border border-background/20">
         <div className="flex flex-col items-center space-y-6">
-          {batch.map((item, i) => (
+          {batch.slice().reverse().map((item, i) => (
             <div key={i} className="w-full flex flex-col items-center">
               {/* Short separator line */}
               {i > 0 && <div className="w-px h-6 bg-gray-300 mb-2"></div>}
@@ -80,6 +116,9 @@ export default function BatchTimeline() {
                   <p className="font-medium">{item.action}</p>
                   <p className="text-foreground/70">{item.actor_name}</p>
                   <p className="text-xs text-foreground/50 mt-2">{item.created_at}</p>
+                  <div className="mt-3">
+                    {renderRoleContent(item)}
+                  </div>
                 </CardContent>
               </Card>
             </div>
