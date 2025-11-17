@@ -6,9 +6,12 @@ import { useParams } from "next/navigation";
 import { GET } from "@/lib/api";
 
 // make an indication of at which point the batch is completed
-// connect the batches data to the completion
 // batch.latestEvent
+// maybe for status rejected?
+//latest event should have different styling
+
 interface BatchEvent {
+  id: string,
   actor_role: string;
   action: string;
   actor_name: string;
@@ -19,6 +22,7 @@ export default function BatchTimeline() {
   // connect timeline to data
   const [batch, setBatch] = useState<BatchEvent[]>([
       {
+        id: '',
         actor_role: "farmer",
         action: "farmer",
         actor_name: "batch.actor_role",
@@ -26,6 +30,7 @@ export default function BatchTimeline() {
       },
       ]
   )
+  const [latestEvent, setLatestEvent] = useState()
   const { id } = useParams();  // ← THIS fetches the [id]
 
   useEffect(() => {
@@ -35,22 +40,13 @@ export default function BatchTimeline() {
       const res = await GET(`/batches/${id}/history`);
       const data = await res.json()
       console.log(data)
-      console.log(data0.batch.latest_event)
+      console.log(data0)
 
       setBatch(data.events);
+      setLatestEvent(data0.batch.latest_event.id)
     }
     fetchData()
   }, [])  //set batch later 
-
-  useEffect(() => {
-    //console.log(batch)
-    }
-    ,
-    [batch] 
-  )
-
-  // does GET/batches/id/history use the event id or the batch id, and does it return an array of objects or?
-
   
 
   const [completed, setCompleted] = useState(false)
@@ -108,14 +104,14 @@ export default function BatchTimeline() {
               {i > 0 && <div className="w-px h-6 bg-gray-300 mb-2"></div>}
 
               {/* Card */}
-              <Card className="w-full bg-background/20 border-foreground/20 text-background">
+              <Card className={`w-full ${ latestEvent !== item.id ? "bg-background/20" : "bg-primary/80"} border-foreground/20 text-background`}>
                 <CardHeader>
                   <CardTitle>{item.actor_role}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="font-medium">{item.action}</p>
                   <p className="text-foreground/70">{item.actor_name}</p>
-                  <p className="text-xs text-foreground/50 mt-2">{item.created_at}</p>
+                  <p className="text-xs text-foreground/50 mt-2">{new Date(item.created_at).toISOString().split("T")[0]}</p>
                   <div className="mt-3">
                     {renderRoleContent(item)}
                   </div>
