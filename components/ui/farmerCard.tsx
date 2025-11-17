@@ -13,7 +13,7 @@ export default function FarmerCard({
     batchCode = "BATCH-2025-001",
     location = "A3",
     date = "16/11/2025",
-    href = "/batch/BATCH-2025-001",
+    href = "/batches/BATCH-2025-001", 
 }: FarmerCardProps) {
     return (
         <Card className="bg-white border-zinc-400/40 border-2 mb-4 hover:border-primary/50 smooth">

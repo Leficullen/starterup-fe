@@ -1,8 +1,29 @@
+"use client"
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import FarmerCard from "@/components/ui/farmerCard";
+import { useState, useEffect } from "react"
+import { GET } from "@/lib/api";
 
 export default function FarmerDashboard() {
+  const [batches, setBatches] = useState([{
+    created_at: "",
+    id: "",
+    qr_code: ""
+  }])
+
+  useEffect(() => {
+    const fetchData = async () => {
+          const res = await GET(`/batches`);
+          const data = await res.json()
+          console.log(data.data)
+          setBatches(data.data)
+    }
+    fetchData()
+  }, [])
+
+
   return (
     <div className="mx-[5%] my-20 to-accent md:p-[2%] p-[3%] rounded-2xl text-background shadow-lg border-2 mt-30">
       <div className="bg-linear-to-r from-primary to-accent px-[3%] md:px-[1%] py-3 rounded-md">
@@ -22,10 +43,15 @@ export default function FarmerDashboard() {
 
       <h2 className="text-xl font-semibold mt-6 mb-2 text-foreground">Your Batches</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FarmerCard batchCode="SIGMA-24-25" date="18/11/2025" location="90 90" />
-        <FarmerCard />
-        <FarmerCard />
-        <FarmerCard />
+        {batches.map((item, i) => (
+          <FarmerCard
+            key={i}
+            batchCode={item.qr_code}
+            date={item.created_at}
+            location="A3"
+            href={`/batch/${item.id}`}
+          />
+        ))}
       </div>
     </div>
   );
