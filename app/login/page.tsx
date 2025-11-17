@@ -1,41 +1,99 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { POST, GET } from "@/lib/api";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 
 export default function LoginPage() {
+  const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    console.log("📩 Sending login request with:", { email, password });
+
+    try {
+      const res = await POST("/auth/login", { email, password });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Login failed");
+        setLoading(false);
+        return;
+      }
+
+      // 1. Store token
+      localStorage.setItem("authToken", data.token);
+
+      // 2. Fetch user role
+      const meRes = await GET("/auth/me");
+      const meData = await meRes.json();
+      console.log("DATA /auth/me:", meData);
+
+      if (!meRes.ok) {
+        setError("Failed to load user role");
+        setLoading(false);
+        return;
+      }
+
+      const role = meData.user.role; // e.g. "collector", "farmer", "processor"
+
+      // 3. Redirect to dashboard role
+      if (!role) {
+        console.error("Role is undefined, can't redirect")
+        return;
+      }
+
+      router.push(`/${role}`);
+    } catch (err: any) {
+      setError("Network error: " + err.message);
+    }
+
+    setLoading(false);
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[url('/pantai_cuk.jpg')] bg-cover ">
-      <div className="bg-background/20 via-primary to-accent backdrop-blur-xl p-8 rounded-2xl shadow-xl w-full md:mx-[30%] mx-[10%] border border-background/20">
-        <h1 className="text-2xl md:text-4xl font-semibold text-background mb-6 text-center">
-          Login
-        </h1>
+      <form
+        onSubmit={handleLogin}
+        className="w-full md:max-w-md mx-auto max-w-xs bg-background/20 backdrop-blur-2xl p-6 rounded-lg shadow-xl "
+      >
+        <h1 className="text-3xl font-bold text-center text-background">Login</h1>
 
-        <div className="space-y-4 text-lg md:text-xl">
-          <Input
-            type="email"
-            placeholder="Email"
-            className="bg-background/20 text-foreground/70 backdrop-blur-2xl"
-          />
-          <Input
-            type="password"
-            placeholder="Password"
-            className="bg-background/20 text-foreground/70 backdrop-blur-2xl"
-          />
+        {error && <div className="text-red-500  text-center text-sm">{error}</div>}
 
-          <Link href="/farmer">
-            <Button className="w-full text-md md:text-xl py-1 md:py-2">Login</Button>
-          </Link>
+        <Input
+          type="email"
+          placeholder="Email"
+          className="ring ring-background mt-3  bg-background/20 px-2 rounded-md w-full mb-3 smooth text-foreground/80"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-          <p className="text-sm md:text-base text-center text-foreground/70/60 mt-5">
-            Didn't have any account?{" "}
-            <Link href="/register">
-              <span className="text-white hover:text-accent">Register</span>
-            </Link>
-          </p>
-        </div>
-      </div>
+        <Input
+          type="password"
+          placeholder="Password"
+          className="ring ring-background px-2 bg-background/20 rounded-md w-full mb-4  smooth text-foreground/80"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-primary text-background font-semibold w-full py-2 rounded-xl hover:-translate-y-0.5 smooth shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed "
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+      </form>
     </div>
   );
 }
