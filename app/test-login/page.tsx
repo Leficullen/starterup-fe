@@ -1,52 +1,98 @@
 "use client";
-import { useState } from "react";
 
-export default function TestLogin() {
+import { useState } from "react";
+import { POST, GET } from "@/lib/api";
+import { useRouter } from "next/navigation";
+
+export default function LoginPage() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  async function doLogin() {
-    const res = await fetch(
-      "https://develop-hackathon-api.224668.xyz/hackathon/v1/auth/login",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    console.log("📩 Sending login request with:", { email, password });
+
+    try {
+      const res = await POST("/auth/login", { email, password });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Login failed");
+        setLoading(false);
+        return;
       }
-    );
 
-    const data = await res.json();
+      // 1. Store token
+      localStorage.setItem("authToken", data.token);
 
-    localStorage.setItem("authToken", data.token);
-    alert("Token disimpan! Anda bisa test API.");
+      // 2. Fetch user role
+      const meRes = await GET("/auth/me");
+      const meData = await meRes.json();
+      console.log("DATA /auth/me:", meData);
+
+      if (!meRes.ok) {
+        setError("Failed to load user role");
+        setLoading(false);
+        return;
+      }
+
+      const role = meData.user.role; // e.g. "collector", "farmer", "processor"
+
+      // 3. Redirect to dashboard role
+      if (!role) {
+        console.error("Role is undefined, can't redirect")
+        return;
+      }
+
+      router.push(`/${role}`);
+    } catch (err: any) {
+      setError("Network error: " + err.message);
+    }
+
+    setLoading(false);
   }
 
   return (
-    <div className="mt-50 p-6">
-      <h1 className="font-bold text-xl">Test Login Sementara</h1>
-
-      <input
-        type="email"
-        className="border p-2 mt-2"
-        placeholder="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-
-      <input
-        type="password"
-        className="border p-2 mt-2"
-        placeholder="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-
-      <button
-        onClick={doLogin}
-        className="bg-blue-500 text-white p-2 mt-3 rounded"
+    <div className="min-h-screen flex items-center justify-center">
+      <form
+        onSubmit={handleLogin}
+        className="w-full max-w-sm bg-white p-6 rounded-lg shadow"
       >
-        Login Sementara
-      </button>
+        <h1 className="text-xl font-bold mb-4">Login</h1>
+
+        {error && <div className="text-red-500 mb-3">{error}</div>}
+
+        <input
+          type="email"
+          placeholder="Email"
+          className="border p-2 rounded w-full mb-3"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          className="border p-2 rounded w-full mb-4"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-blue-500 text-white w-full py-2 rounded"
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+      </form>
     </div>
   );
 }
