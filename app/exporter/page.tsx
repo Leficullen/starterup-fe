@@ -45,9 +45,9 @@ export default function ExporterDashboard() {
   if (loading) return <div className="text-black text-4xl">Loading...</div>;
 
   return (
-    <div className="p-6 max-w-md mx-auto text-white">
-      <h1 className="text-2xl font-semibold">Hello, Exporter {me?.email}</h1>
-      <p className="text-white/60 -mt-2">Role: Exporter</p>
+    <div className="p-6 max-w-md mx-auto">
+      <h1 className="text-2xl font-semibold">Hello, IndoShrimp Plant</h1>
+      <p className="mt-2">Role: Processing Facility</p>
 
       {/* Actions */}
       <div className="grid grid-cols-2 gap-4 mt-6">

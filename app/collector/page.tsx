@@ -52,8 +52,8 @@ export default function CollectorDashboard() {
   if (loading) return <div className="text-black text-4xl">Loading...</div>;
 
   return (
-    <div className="p-6 max-w-md mx-auto text-white">
-      <h1 className="text-2xl font-semibold">Welcome, Collector {me?.email}</h1>
+    <div className="p-6 max-w-md mx-auto">
+      <h1 className="text-2xl font-semibold">Welcome, Collector Arif</h1>
       <p className="text-white/60 -mt-2">Role: Collector</p>
 
       {/* Main Actions */}
