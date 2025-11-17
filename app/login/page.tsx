@@ -7,12 +7,12 @@ import Link from "next/link";
 export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[url('/pantai_cuk.jpg')] bg-cover ">
-      <div className="bg-background/20 via-primary to-accent backdrop-blur-xl p-8 rounded-2xl shadow-xl w-full md:mx-[30%] mx-[10%] border border-background/20">
-        <h1 className="text-2xl md:text-4xl font-semibold text-background mb-6 text-center">
+      <div className="bg-background/20 via-primary to-accent backdrop-blur-xl p-8 rounded-2xl shadow-xl w-full mx-[30%] border border-background/20">
+        <h1 className="text-4xl font-semibold text-background mb-6 text-center">
           Login
         </h1>
 
-        <div className="space-y-4 text-lg md:text-xl">
+        <div className="space-y-4 text-xl">
           <Input
             type="email"
             placeholder="Email"
@@ -25,10 +25,10 @@ export default function LoginPage() {
           />
 
           <Link href="/farmer">
-            <Button className="w-full text-md md:text-xl py-1 md:py-2">Login</Button>
+            <Button className="w-full text-xl py-2">Login</Button>
           </Link>
 
-          <p className="text-sm md:text-base text-center text-foreground/70/60 mt-5">
+          <p className="text-base text-center text-foreground/70/60 mt-5">
             Didn't have any account?{" "}
             <Link href="/register">
               <span className="text-white hover:text-accent">Register</span>
