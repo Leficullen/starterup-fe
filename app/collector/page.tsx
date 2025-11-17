@@ -15,7 +15,7 @@ export default function CollectorDashboard() {
   }, []);
 
   return (
-    <div className="p-6 max-w-md mx-auto text-white">
+    <div className="p-6 max-w-md mx-auto">
       <h1 className="text-2xl font-semibold">Welcome, Collector Arif</h1>
       <p className="text-white/60 -mt-2">Role: Collector</p>
 
