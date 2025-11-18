@@ -5,4 +5,13 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     ports:
+      - "3031:3000"
+
+services:
+  starter-up-fe-main:
+    image: jocimsus/starter-up-fe:latest
+    container_name: starter-up-fe-latest
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    ports:
       - "3131:3000"
