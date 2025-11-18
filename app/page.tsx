@@ -18,25 +18,25 @@ export default function Home() {
       role: "Farmer",
       title: "Harvesting Shrimp",
       description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, facere sequi blanditiis porro suscipit tempore.",
+        "Farmers harvest shrimp and create a batch with location and harvest time. This starts the traceability process for the entire supply chain. They generate a unique QR code for the batch, which is attached to the container for tracking throughout the supply chain.",
     },
     {
       role: "Collector",
       title: "Collecting Shrimp",
       description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad saepe nulla quibusdam ut.",
+        "Collectors scan the QR code from the farmer’s container, record receiving time, weight, and a photo, then update the batch status based on initial checks.",
     },
     {
       role: "Processor",
       title: "Checking Shrimps Quality",
       description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, facere sequi blanditiis.",
+        "Processors scan the batch QR, upload health certificates and lab test results, and set the batch status after verifying shrimp quality.",
     },
     {
       role: "Exporter",
       title: "Exporting Shrimps Abroad",
       description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, facere sequi blanditiis.",
+        "Exporters scan the batch QR, fill in container details, receiving and shipping dates, and confirm the final status before export.",
     },
   ];
 
@@ -154,27 +154,30 @@ export default function Home() {
               return (
                 <div
                   key={item.role}
-                  className="grid grid-cols-[1fr_auto_1fr] items-center gap-5 md:gap-10"
+                  className="md:grid flex flex-col grid-cols-[1fr_auto_1fr] items-center gap-5 md:gap-10"
                 >
+                  <div className="md:hidden flex">
+                    <div className="w-5 h-5 bg-accent rounded-full z-10 animate-ping " />
+                    <div className="absolute w-5 h-5 bg-primary rounded-full z-10 animate " />
+                  </div>
                   <div className="flex justify-end">
                     {cardOnRight ? (
-                      <div className="bg-primary text-white text-sm md:text-base px-5 py-3 rounded-full shadow-md">
+                      <div className="bg-primary md:block hidden text-white text-sm md:text-base px-5 py-3 rounded-full shadow-md">
                         {item.role}
                       </div>
                     ) : (
-                      <div className="bg-white rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] px-6 py-6 md:px-8 md:py-7 max-w-xl w-full">
+                      <div className="bg-white text-center md:text-end  rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] px-6 py-6 md:px-8 md:py-7 max-w-xl w-full">
                         <h3 className="text-primary font-semibold text-lg md:text-xl">
                           {item.title}{" "}
                         </h3>
                         <p className="text-gray-600 mt-3 text-sm md:text-base">
                           {item.description}
                         </p>
-
                       </div>
                     )}
                   </div>
 
-                  <div className="flex justify-center">
+                  <div className="hidden md:flex">
                     <div className="w-5 h-5 bg-accent rounded-full z-10 animate-ping " />
                     <div className="absolute w-5 h-5 bg-primary rounded-full z-10 animate " />
                   </div>
@@ -182,17 +185,16 @@ export default function Home() {
                   <div className="flex justify-start">
                     {cardOnRight ? (
                       // Card (kanan)
-                      <div className="bg-white rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] px-6 py-6 md:px-8 md:py-7 max-w-xl w-full">
-                        <h3 className="text-primary font-semibold text-lg md:text-xl">
+                      <div className="bg-white text-center md:text-start rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] px-6 py-6 md:px-8 md:py-7 max-w-xl w-full">
+                        <h3 className="text-primary  font-semibold text-lg md:text-xl">
                           {item.title}{" "}
                         </h3>
                         <p className="text-gray-600 mt-3 text-sm md:text-base">
                           {item.description}
                         </p>
-
                       </div>
                     ) : (
-                      <div className="bg-primary text-white text-sm md:text-base px-5 py-3 rounded-full shadow-md">
+                      <div className="md:block hidden bg-primary text-white text-sm md:text-base px-5 py-3 rounded-full shadow-md">
                         {item.role}
                       </div>
                     )}

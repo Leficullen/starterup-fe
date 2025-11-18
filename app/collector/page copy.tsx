@@ -55,9 +55,9 @@ export default function FarmerDashboard() {
 
       {/* Actions */}
       <div className="flex gap-4 mt-6 w-full">
-        <Link href="/farmer/create-batch" className="w-full">
+        <Link href="/scan" className="w-full">
           <Button className="bg-background shadow-lg border-2 rounded-lg w-full md:w-fit text-base md:text-lg text-primary hover:text-background hover:bg-primary font-bold border-primary">
-            + Create Batch
+            Scan QR Code
           </Button>
         </Link>
       </div>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import React from "react";
 import { Button } from "./ui/button";
-import { Home } from "lucide-react";
+import { Home, HomeIcon } from "lucide-react";
 
 const Navbar = () => {
   return (
@@ -16,7 +16,7 @@ const Navbar = () => {
       </div>
       <div className="flex md:hidden">
         <Link href="/">
-          <Home width="30px" height="30px" className="text-primary"/>
+          <HomeIcon width="30px" height="30px" className="text-primary"/>
         </Link>
       </div>
       <div className="">

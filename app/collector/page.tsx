@@ -1,72 +1,81 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import FarmerCard from "@/components/ui/farmerCard";
+import { GET } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
-export default function CollectorDashboard() {
+export default function FarmerDashboard() {
+  const router = useRouter();
+
+  const [user, setUser] = useState<any>(null);
   const [batches, setBatches] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Load scanned batches from localStorage
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("my_batches") || "[]");
-    setBatches(saved);
-  }, []);
+    async function loadData() {
+      try {
+        // 1. AUTH CHECK
+        const res = await GET("/auth/me");
+        const data = await res.json();
+
+        if (!res.ok || !data.user) {
+          router.push("/login");
+          return;
+        }
+
+        setUser(data.user);
+
+        // 2. GET BATCHES
+        const batchRes = await GET(`/batch?farmerId=${data.user.id}`);
+        const batchData = await batchRes.json();
+
+        setBatches(batchData.batches || []);
+      } catch (err) {
+        console.error("AUTH ERROR:", err);
+        router.push("/login");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, [router]);
+
+  if (loading) return <div className="p-4">Loading...</div>;
 
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-semibold">Welcome, Collector Arif</h1>
-      <p className="text-white/60 -mt-2">Role: Collector</p>
-
-      {/* Main Actions */}
-      <div className="grid grid-cols-2 gap-4 mt-6">
-        <Link href="/scan   ">
-          {" "}
-          {/* ← penting: pastikan route benar */}
-          <Button className="h-24 w-full text-lg font-semibold">
-            📷 Scan QR
-          </Button>
-        </Link>
-
-        <Button variant="secondary" className="h-24 w-full text-lg" disabled>
-          Received List
-        </Button>
+    <div className="mx-[5%] my-20 md:p-[2%] p-[3%] rounded-2xl text-background shadow-lg border-2">
+      <div className="bg-linear-to-r from-primary to-accent px-[3%] md:px-[1%] py-3 rounded-md">
+        <h1 className="text-lg md:text-2xl font-semibold text-background">
+          Hello, {user?.name}
+        </h1>
+        <p className="text-background">Role: {user?.role}</p>
       </div>
 
-      <h2 className="text-xl font-semibold mt-6 mb-2">Incoming Batches</h2>
+      <div className="flex gap-4 mt-6 w-full">
+        <Link href="/scan" className="w-full">
+          <Button className="bg-background shadow-lg border-2 rounded-lg w-full md:w-fit text-base md:text-lg text-primary hover:text-background hover:bg-primary font-bold border-primary">
+            Scan QR Code
+          </Button>
+        </Link>
+      </div>
 
-      {/* If no batches */}
+      <h2 className="text-xl font-semibold mt-6 mb-2 text-foreground">
+        Your Batches
+      </h2>
+
       {batches.length === 0 && (
-        <p className="text-white/50 mt-2">
-          Belum ada batch yang discan. Silakan scan batch QR → 📷
-        </p>
+        <p className="text-sm text-muted-foreground">No batches yet.</p>
       )}
 
-      {/* Dynamic batch cards */}
-      {batches.map((batch) => (
-        <Card className="bg-white/10 border-white/20 mb-4" key={batch.id}>
-          <CardHeader>
-            <CardTitle>{batch.id}</CardTitle>
-          </CardHeader>
-
-          <CardContent className="space-y-1">
-            <p>From Farmer: {batch.farmer_name || "Unknown"}</p>
-            <p>
-              Pond {batch.pond_id || "-"} • Harvest Date:{" "}
-              {batch.harvest_date
-                ? new Date(batch.harvest_date).toLocaleDateString()
-                : "-"}
-            </p>
-
-            <Link href={`/batch/${batch.id}`}>
-              <Button variant="outline" className="w-full mt-3 text-white">
-                Record Arrival →
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {batches.map((batch, i) => (
+          <FarmerCard key={i} batch={batch} />
+        ))}
+      </div>
     </div>
   );
 }
