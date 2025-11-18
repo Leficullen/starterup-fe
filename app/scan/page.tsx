@@ -81,22 +81,25 @@ export default function ScannerPage() {
           return;
         }
 
-        // Fetch batch details
+        // Fetch batch details from mock data
         try {
-          const res = await GET(`/batches/${raw}`);
-          const json = await res.json();
+          const { getBatch, addBatchHistory } = await import("@/lib/api");
+          const res = await getBatch(raw);
 
-          if (!res.ok || !json.batch) {
+          if (!res.ok || !res.data) {
             showErrorMessage("Batch not found.");
             setIsProcessing(false);
             return;
           }
 
-          const batch = json.batch;
+          const batch = res.data;
 
 
           scanner.stop();
           router.push(`/${role}/qc-report?batchId=${batch.id}`);
+
+          // DUMMY HISTORY INFORMATION (ONLY RECEIVED FOR NOW)
+          await addBatchHistory(batch.id, "Received batch", role!, userId!);
 
           showSuccessMessage("Batch added successfully.");
 
