@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { GET } from "@/lib/api";
 import QrScanner from "qr-scanner";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 
 export default function ScannerPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -82,25 +81,21 @@ export default function ScannerPage() {
           return;
         }
 
-        // Fetch batch details from mock data
+        // Fetch batch details
         try {
-          const { getBatch, addBatchHistory } = await import("@/lib/api");
-          const res = await getBatch(raw);
+          const res = await GET(`/batches/${raw}`);
+          const json = await res.json();
 
-          if (!res.ok || !res.data) {
+          if (!res.ok || !json.batch) {
             showErrorMessage("Batch not found.");
             setIsProcessing(false);
             return;
           }
 
-          const batch = res.data;
-
+          const batch = json.batch;
 
           scanner.stop();
           router.push(`/${role}/qc-report?batchId=${batch.id}`);
-
-          // DUMMY HISTORY INFORMATION (ONLY RECEIVED FOR NOW)
-          await addBatchHistory(batch.id, "Received batch", role!, userId!);
 
           showSuccessMessage("Batch added successfully.");
 
@@ -115,7 +110,7 @@ export default function ScannerPage() {
       },
       {
         highlightScanRegion: true,
-        onDecodeError: () => { }, // Ignore unstable frames
+        onDecodeError: () => {}, // Ignore unstable frames
       }
     );
 
@@ -152,14 +147,71 @@ export default function ScannerPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-white p-6">
-      <h1 className="text-2xl font-semibold mb-4">Scan Batch QR</h1>
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
+      {/* Toast Modal */}
+      {uiMessage && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div
+            className={`${
+              messageType === "success" ? "bg-green-500" : "bg-red-500"
+            } rounded-lg shadow-xl px-6 py-5 text-center max-w-sm mx-auto`}
+          >
+            <p className="text-background text-lg">{uiMessage}</p>
+          </div>
+        </div>
+      )}
 
-      <div className="w-64 h-64 rounded-2xl border-4 border-white/30 flex items-center justify-center bg-white/10">
-        📷 Camera Preview
-      </div>
+      {/* Header */}
+      <header className="flex items-center gap-3 px-4 py-3 border-b bg-card/80 backdrop-blur">
+        <button
+          onClick={handleCancel}
+          className="flex items-center justify-center h-9 w-9 rounded-full border hover:bg-accent transition"
+        >
+          ←
+        </button>
 
-      <Button className="w-64 mt-6">Start Scanning</Button>
+        <div className="flex flex-col">
+          <span className="font-semibold text-sm">Scan Batch</span>
+          <span className="text-xs text-muted-foreground">
+            {roleLoaded ? `Logged in as ${role}` : "Loading..."}
+          </span>
+        </div>
+      </header>
+
+      {/* Main Section */}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
+        <div className="relative w-full max-w-md flex flex-col items-center gap-4">
+          {/* Camera Box */}
+          <div className="relative w-full aspect-3/4 max-w-xs rounded-2xl border-4 border-primary/70 overflow-hidden shadow-lg bg-black/40">
+            {error ? (
+              <div className="flex items-center justify-center h-full text-red-500 text-sm px-3 text-center">
+                {error}
+              </div>
+            ) : (
+              <video
+                ref={videoRef}
+                className="h-full w-full object-cover"
+                playsInline
+                muted
+              />
+            )}
+
+            {isProcessing && (
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center gap-2 text-white">
+                <div className="h-6 w-6 rounded-full border-2 border-white/40 border-t-transparent animate-spin" />
+                <span>Processing...</span>
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={handleCancel}
+            className="px-4 py-2 rounded-full border border-red-500 text-red-600 text-sm hover:bg-red-500/10 transition"
+          >
+            Cancel
+          </button>
+        </div>
+      </main>
     </div>
   );
 }
