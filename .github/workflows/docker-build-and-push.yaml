@@ -43,4 +43,4 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/starter-up-fe:dev
           platforms: linux/amd64
-        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/dev'
