@@ -162,7 +162,7 @@ export default function ScannerPage() {
       )}
 
       {/* Header */}
-      <header className="flex items-center gap-3 px-4 py-3 border-b bg-card/80 backdrop-blur">
+      <header className="flex absolute items-center gap-3 px-4 py-2 mt-20 lg:mt-[6%]">
         <button
           onClick={handleCancel}
           className="flex items-center justify-center h-9 w-9 rounded-full border hover:bg-accent transition"
@@ -179,7 +179,7 @@ export default function ScannerPage() {
       </header>
 
       {/* Main Section */}
-      <main className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
+      <main className="flex-1 flex flex-col mt-20 md:mt-40 items-center justify-center px-4 pb-8">
         <div className="relative w-full max-w-md flex flex-col items-center gap-4">
           {/* Camera Box */}
           <div className="relative w-full aspect-3/4 max-w-xs rounded-2xl border-4 border-primary/70 overflow-hidden shadow-lg bg-black/40">
