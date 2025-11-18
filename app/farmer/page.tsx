@@ -3,51 +3,41 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getMe } from "@/lib/api";
+import { getMe, getBatches } from "@/lib/api";
 import FarmerCard from "@/components/ui/farmerCard";
 
 export default function FarmerDashboard() {
-  // const [loading, setLoading] = useState(true);
-  // const [me, setMe] = useState<any>(null);
-  // const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [me, setMe] = useState<any>(null);
+  const [batches, setBatches] = useState<any[]>([]);
+  const router = useRouter();
 
-  // useEffect(() => {
-  //   let isMounted = true;
-  //   async function load() {
-  //     try {
-  //       const profile = await getMe();
-  //       if (!isMounted) return;
-  //       if (!profile || !profile.role) {
-  //         router.push("/");
-  //         return;
-  //       }
+  useEffect(() => {
+    async function load() {
+      const profile = await getMe();
+      if (!profile?.role) return router.push("/");
+      if (profile.role.toLowerCase() !== "farmer")
+        return router.push(`/${profile.role}`);
 
-  //       const role = (profile.role || "").toLowerCase();
-  //       if (role !== "farmer") {
-  //         const dest = role === "exporter" ? "/exporter" : `/${role}`;
-  //         router.push(dest);
-  //         return;
-  //       }
-  //       setMe(profile);
-  //       setLoading(false);
-  //     } catch (error) {
-  //       console.error("Error loading profile:", error);
-  //       router.push("/");
-  //     }
-  //   }
-  //   load();
-  //   return () => {
-  //     isMounted = false;
-  //   };
-  // }, [router]);
+      setMe(profile);
 
-  // if (loading) return <div className="text-black texl-4xl">Loading...</div>;
+      const resp = await getBatches({ farmer_id: profile.id });
+      if (resp.ok && resp.data) setBatches(resp.data);
+
+      setLoading(false);
+    }
+
+    load();
+  }, [router]);
+
+  if (loading) return <div className="text-black texl-4xl">Loading...</div>;
 
   return (
     <div className="mx-[5%] my-20 to-accent md:p-[2%] p-[3%] rounded-2xl text-background shadow-lg border-2 mt-30">
       <div className="bg-linear-to-r from-primary to-accent px-[3%] md:px-[1%] py-3 rounded-md">
         <h1 className="text-lg md:text-2xl font-semibold text-background">
-          Hello, Pak Hasan
+          {/* testing email */}
+          Hello, Pak Hasan {me?.email}
         </h1>
         <p className="text-background">Role: Farmer</p>
       </div>
@@ -64,14 +54,21 @@ export default function FarmerDashboard() {
         Your Batches
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FarmerCard
-          batchCode="SIGMA-24-25"
-          date="18/11/2025"
-          location="90 90"
-        />
-        <FarmerCard />
-        <FarmerCard />
-        <FarmerCard />
+        {batches.length === 0 ? (
+          <p className="text-foreground/70">
+            No batches yet. Create your first batch!
+          </p>
+        ) : (
+          batches.map((batch) => (
+            <FarmerCard
+              key={batch.id}
+              batchCode={batch.qr_code}
+              date={new Date(batch.catch_time).toLocaleDateString()}
+              location={batch.metadata?.pond_id || "Unknown"}
+              href={`/batch/${batch.id}`}
+            />
+          ))
+        )}
       </div>
     </div>
   );

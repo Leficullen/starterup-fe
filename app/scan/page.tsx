@@ -85,18 +85,18 @@ export default function ScannerPage() {
           return;
         }
 
-        // Fetch batch details
+        // Fetch batch details from mock data
         try {
-          const res = await GET(`/batches/${raw}`);
-          const json = await res.json();
+          const { getBatch, addBatchHistory } = await import("@/lib/api");
+          const res = await getBatch(raw);
 
-          if (!res.ok || !json.batch) {
+          if (!res.ok || !res.data) {
             showErrorMessage("Batch not found.");
             setIsProcessing(false);
             return;
           }
 
-          const batch = json.batch;
+          const batch = res.data;
 
           // Per-user storage
           const key = localKey();
@@ -113,6 +113,9 @@ export default function ScannerPage() {
           // Save batch
           saved.push(batch);
           localStorage.setItem(key, JSON.stringify(saved));
+
+          // DUMMY HISTORY INFORMATION (ONLY RECEIVED FOR NOW)
+          await addBatchHistory(batch.id, "Received batch", role!, userId!);
 
           showSuccessMessage("Batch added successfully.");
 

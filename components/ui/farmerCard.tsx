@@ -1,32 +1,34 @@
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardContent, CardTitle } from "./card";
+import { Button } from "./button";
 
-type FarmerCardProps = {
-    batchCode?: string;
-    location?: string;
-    date?: string | number;
-    href?: string;
-};
+interface FarmerCardProps {
+  batchCode: string;
+  date: string;
+  location: string;
+  href: string;
+}
 
 export default function FarmerCard({
-    batchCode = "BATCH-2025-001",
-    location = "A3",
-    date = "16/11/2025",
-    href = "/batch/BATCH-2025-001",
+  batchCode,
+  date,
+  location,
+  href,
 }: FarmerCardProps) {
-    return (
-        <Card className="bg-white border-zinc-400/40 border-2 mb-4 hover:border-primary/50 smooth">
-            <CardHeader>
-                <CardTitle>{batchCode}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-1">
-                <p>Date: {date}</p>
-                <p>Location: {location}</p>
-                <Link href={href}>
-                    <Button className="w-full mt-3 ring-primary ring-2">View Details →</Button>
-                </Link>
-            </CardContent>
-        </Card>
-    );
+  return (
+    <Card className="bg-white md:w-full border-zinc-400/40 border-4 hover:border-primary/50 smooth">
+      <CardHeader>
+        <CardTitle>BATCH ID: {batchCode}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-1">
+        <p>Pond Location: {location}</p>
+        <p>Harvest Date: {date}</p>
+        <Link href={href}>
+          <Button className="w-full mt-3 ring-primary ring-2">
+            View Details →
+          </Button>
+        </Link>
+      </CardContent>
+    </Card>
+  );
 }

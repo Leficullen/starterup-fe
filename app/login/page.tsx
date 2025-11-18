@@ -5,30 +5,57 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { userLogin, getMe } from "@/lib/api";
+import { POST, GET } from "@/lib/api";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const res = await userLogin({ email, password });
-    if (res.ok && res.user && res.user.role) {
-      const role = res.user.role.toLowerCase();
-      const dest = role === "exporter" ? "/exporter" : `/${role}`;
-      router.push(dest);
-    } else {
-      setError(res.message || "Login failed");
+    console.log("Login request sent", { email, password });
+
+    try {
+      const response = await POST("/auth/login", { email, password });
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Login failed");
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem("authToken", data.token);
+      const meRes = await GET("/auth/me");
+      const meData = await meRes.json();
+      console.log("DATA /auth/me:", meData);
+
+      if (!meRes.ok) {
+        setError("Failed to load user role");
+        setLoading(false);
+        return;
+      }
+
+      const role = meData.user.role;
+
+      if (!role) {
+        console.error("Role is undefined, cant redirect");
+        return;
+      }
+
+      router.push(`/${role}`);
+    } catch (err: any) {
+      setError("Error network has occured");
     }
+
     setLoading(false);
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[url('/pantai_cuk.jpg')] bg-cover ">
