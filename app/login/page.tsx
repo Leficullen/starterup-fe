@@ -59,7 +59,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[url('/pantai_cuk.jpg')] bg-cover ">
-      <div className="bg-background/20 via-primary to-accent backdrop-blur-xl p-8 rounded-2xl shadow-xl w-full mx-[30%] border border-background/20">
+      <div className="bg-background/20 via-primary to-accent backdrop-blur-xl p-8 rounded-2xl shadow-xl w-full mx-8 md:mx-[30%] border border-background/20">
         <h1 className="text-4xl font-semibold text-background mb-6 text-center">
           Login
         </h1>
