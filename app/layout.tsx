@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "TraceShrimp",
+  title: "Shrimp Linkers",
   description: "End-to-end traceability for shrimp supply chain.",
 };
 
@@ -17,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={` ${inter.className}`}>
-        <Navbar/>
+        <Navbar />
         <div>{children}</div>
       </body>
     </html>

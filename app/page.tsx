@@ -75,9 +75,9 @@ export default function Home() {
               Problems
             </h3>
             <div>
-              <ul className="list-disc ml-16 text-red-800">
-                {Solutions.map((problem) => (
-                  <li className=" text-lg">{problem}</li>
+              <ul className="list-disc mt-3 md:mt-0 md:ml-16 mx-[15px] text-red-800">
+                {Problem.map((problem, index) => (
+                  <li className="text-sm md:text-lg" key={index}>{problem}</li>
                 ))}
               </ul>
             </div>
@@ -90,9 +90,9 @@ export default function Home() {
               Solutions
             </h3>
             <div>
-              <ul className="list-disc ml-16 text-green-800">
-                {Problem.map((solution) => (
-                  <li className="text-lg">{solution}</li>
+              <ul className="list-disc mt-3 md:mt-0 md:ml-16 mx-[15px] text-green-800">
+                {Solutions.map((solution, index) => (
+                  <li className="text-sm md:text-lg" key={index}>{solution}</li>
                 ))}
               </ul>
             </div>
