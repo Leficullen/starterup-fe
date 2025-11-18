@@ -1,20 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { PATCH } from "@/lib/api";
 
 export default function ProcessorQcReportPage() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    const [batchId, setBatchId] = useState<string>("");
     const [receivedAt, setReceivedAt] = useState<string>("");
     const [certFile, setCertFile] = useState<File | null>(null);
     const [certName, setCertName] = useState<string | null>(null);
-    const [labFile, setLabFile] = useState<File | null>(null);
-    const [labFileName, setLabFileName] = useState<string | null>(null);
-    const [labPreview, setLabPreview] = useState<string | null>(null);
-    const [status, setStatus] = useState<"in progress" | "accepted" | "rejected">("in progress");
-    const [errors, setErrors] = useState<{ receivedAt?: string; cert?: string; labFile?: string }>({});
+    const [status, setStatus] = useState<"accepted" | "rejected">("accepted");
+    const [errors, setErrors] = useState<{ batchId?: string; receivedAt?: string; cert?: string; labFile?: string }>({});
     const [certPreview, setCertPreview] = useState<string | null>(null);
+    const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
     function formatDate(d: Date) {
         const dd = String(d.getDate()).padStart(2, "0");
@@ -25,6 +29,8 @@ export default function ProcessorQcReportPage() {
 
     useEffect(() => {
         setReceivedAt(formatDate(new Date()));
+        const id = searchParams?.get?.("batchId");
+        if (id) setBatchId(id);
     }, []);
 
     useEffect(() => {
@@ -69,22 +75,51 @@ export default function ProcessorQcReportPage() {
     }
 
     function validateForm() {
-        const next: { receivedAt?: string; cert?: string; labFile?: string } = {};
+        const next: { batchId?: string; receivedAt?: string; cert?: string; labFile?: string } = {};
+        if (!batchId) next.batchId = "Batch ID diperlukan untuk men-submit";
         if (!receivedAt || !/^(\d{2})\/(\d{2})\/(\d{4})$/.test(receivedAt)) {
             next.receivedAt = "Waktu penerimaan harus berformat dd/mm/yyyy";
         }
         if (!certFile) next.cert = "Certificate of healthy shrimp harus diunggah (PDF/JPG/PNG)";
-        if (!labFile) next.labFile = "Hasil uji laboratorium harus diunggah (PDF/JPG/PNG)";
         setErrors(next);
         return Object.keys(next).length === 0;
     }
 
-    function handleSubmit() {
+    async function handleSubmit() {
+        setSubmitMessage(null);
         if (!validateForm()) return;
         setErrors({});
-        // TODO: send to backend (FormData with file)
+
+        // Define the explicit metadata keys requested
+        type ProcessorMetadata = {
+            statusProcessor: "accepted" | "rejected";
+            certificateName: string | null;
+        };
+
+        const metadata: ProcessorMetadata = {
+            statusProcessor: status,
+            certificateName: certName ?? null,
+        };
+
+        // Log the exact payload for clarity/debugging
         // eslint-disable-next-line no-console
-        console.log("Submit processor QC report", { receivedAt, certFile, labFile, status });
+        console.log("Processor metadata to send:", metadata);
+
+        try {
+            const res = await PATCH(`/batches/${batchId}`, { metadata });
+            let parsed: any = null;
+            try { parsed = await res.json(); } catch (e) { /* ignore */ }
+            const newMetadata = parsed?.batch?.metadata ?? parsed?.metadata ?? null;
+            setSubmitMessage("Metadata appended successfully.");
+            // eslint-disable-next-line no-console
+            console.log("Processor metadata appended:", newMetadata ?? parsed ?? res);
+            // navigate back to processor dashboard/page
+            router.push("/processor");
+        } catch (err: any) {
+            setSubmitMessage(err?.message || "Submit failed");
+            // eslint-disable-next-line no-console
+            console.error(err);
+        }
     }
 
     return (
@@ -96,6 +131,18 @@ export default function ProcessorQcReportPage() {
                     <CardTitle>Informasi Pemeriksaan</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                    {/* Batch ID (from URL or paste here) */}
+                    <div>
+                        <label className="block text-sm mb-1 text-black">Batch ID</label>
+                        <Input
+                            placeholder="Batch ID (dapat diambil dari URL)"
+                            className="bg-white/20 text-black"
+                            value={batchId}
+                            aria-invalid={errors.batchId ? "true" : undefined}
+                            onChange={(e) => setBatchId((e.target as HTMLInputElement).value)}
+                        />
+                        {errors.batchId && <div className="text-sm text-destructive mt-1">{errors.batchId}</div>}
+                    </div>
                     {/* Waktu penerimaan di fasilitas pemrosesan */}
                     <div>
                         <label className="block text-sm mb-1 text-black">Waktu penerimaan</label>
@@ -118,39 +165,17 @@ export default function ProcessorQcReportPage() {
                         {certPreview && <img src={certPreview} alt="cert preview" className="mt-2 max-h-40 object-contain rounded" />}
                     </div>
 
-                    {/* Hasil uji laboratorium (file) */}
-                    <div>
-                        <label className="block text-sm mb-1 text-black">Hasil uji laboratorium (PDF / JPG / PNG)</label>
-                        <input type="file" accept="application/pdf,image/png,image/jpeg" onChange={(e) => {
-                            const f = e.target.files && e.target.files[0];
-                            if (!f) return;
-                            const allowed = ["application/pdf", "image/png", "image/jpeg"];
-                            if (!allowed.includes(f.type)) {
-                                setLabFile(null);
-                                setLabFileName(null);
-                                setErrors((s) => ({ ...s, labFile: "File harus PDF, JPG, atau PNG" }));
-                                return;
-                            }
-                            setLabFile(f);
-                            setLabFileName(f.name);
-                            setErrors((s) => ({ ...s, labFile: undefined }));
-                        }} className="block w-full text-sm text-black" />
-                        {errors.labFile && <div className="text-sm text-destructive mt-1">{errors.labFile}</div>}
-                        {labFileName && <div className="text-sm text-black mt-1">Diunggah: {labFileName}</div>}
-                        {labPreview && <img src={labPreview} alt="lab preview" className="mt-2 max-h-40 object-contain rounded" />}
-                    </div>
-
                     {/* Status pemeriksaan */}
                     <div>
                         <label className="block text-sm mb-1 text-black">Status pemeriksaan</label>
                         <select value={status} onChange={(e) => setStatus(e.target.value as any)} className="w-full rounded px-3 py-2 bg-white/10 text-black">
-                            <option value="in progress">In progress</option>
                             <option value="accepted">Accepted</option>
                             <option value="rejected">Rejected</option>
                         </select>
                     </div>
 
                     <Button className="w-full" onClick={handleSubmit}>Kirim Laporan</Button>
+                    {submitMessage && <div className="text-sm mt-2 text-center">{submitMessage}</div>}
                 </CardContent>
             </Card>
         </div>

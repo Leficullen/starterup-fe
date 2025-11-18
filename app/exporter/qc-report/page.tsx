@@ -1,16 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { GET, PATCH } from "@/lib/api";
 
 export default function ExporterQcReportPage() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    const [batchId, setBatchId] = useState<string>("");
     const [specFile, setSpecFile] = useState<File | null>(null);
     const [specName, setSpecName] = useState<string | null>(null);
     const [receivedAt, setReceivedAt] = useState<string>("");
-    const [status, setStatus] = useState<"shipping" | "accepted" | "rejected">("shipping");
-    const [errors, setErrors] = useState<{ spec?: string; receivedAt?: string }>({});
+    const [status, setStatus] = useState<"accepted" | "rejected">("accepted");
+    const [errors, setErrors] = useState<{ batchId?: string; spec?: string; receivedAt?: string }>({});
+    const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
     function formatDate(d: Date) {
         const dd = String(d.getDate()).padStart(2, "0");
@@ -19,8 +26,11 @@ export default function ExporterQcReportPage() {
         return `${dd}/${mm}/${yyyy}`;
     }
 
+    // TODO: Batchid
     useEffect(() => {
         setReceivedAt(formatDate(new Date()));
+        const id = searchParams?.get?.("batchId");
+        if (id) setBatchId(id);
     }, []);
 
     function formatDateInput(input: string) {
@@ -47,7 +57,8 @@ export default function ExporterQcReportPage() {
     }
 
     function validateForm() {
-        const next: { spec?: string; receivedAt?: string } = {};
+        const next: { batchId?: string; spec?: string; receivedAt?: string } = {};
+        if (!batchId) next.batchId = "Batch ID diperlukan untuk men-submit";
         if (!specFile) next.spec = "Spesifikasi kontainer (PDF) harus diunggah";
         if (!receivedAt || !/^(\d{2})\/(\d{2})\/(\d{4})$/.test(receivedAt)) {
             next.receivedAt = "Tanggal penerimaan harus berformat dd/mm/yyyy";
@@ -56,14 +67,50 @@ export default function ExporterQcReportPage() {
         return Object.keys(next).length === 0;
     }
 
-    function handleSubmit() {
+    async function handleSubmit() {
+        setSubmitMessage(null);
         if (!validateForm()) return;
         setErrors({});
-        // TODO: wire to backend API
-        // eslint-disable-next-line no-console
-        console.log("Submit exporter QC report", { specFile, receivedAt, status });
-    }
 
+        // Explicit metadata shape for exporter
+        type ExporterMetadata = {
+            receivedAtExporter: string;
+            statusExporter: "accepted" | "rejected";
+            specName?: string;
+        };
+
+        const metadata: ExporterMetadata = {
+            receivedAtExporter: receivedAt,
+            statusExporter: status,
+        };
+        if (specName) metadata.specName = specName;
+
+        // debug log payload
+        // eslint-disable-next-line no-console
+        console.log("Sending exporter metadata:", metadata);
+
+        try {
+            const res = await PATCH(`/batches/${batchId}`, { metadata });
+            // try to parse returned JSON and log resulting metadata
+            let parsed: any = null;
+            try {
+                parsed = await res.json();
+            } catch (e) {
+                // non-json response
+            }
+
+            const newMetadata = parsed?.batch?.metadata ?? parsed?.metadata ?? null;
+            // show success and log the new metadata
+            setSubmitMessage("Metadata appended successfully.");
+            // eslint-disable-next-line no-console
+            console.log("New metadata after PATCH:", newMetadata ?? parsed ?? res); // ! DEBUG
+            router.push("/exporter");
+        } catch (err: any) {
+            setSubmitMessage(err?.message || "Submit failed");
+            // eslint-disable-next-line no-console
+            console.error(err);
+        }
+    }
     return (
         <div className="p-6 max-w-md mx-auto min-h-screen flex flex-col items-center justify-center">
             <h1 className="text-2xl font-semibold">Laporan QC - Exporter</h1>
@@ -73,6 +120,12 @@ export default function ExporterQcReportPage() {
                     <CardTitle>Spesifikasi & Status</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                    {/* Batch ID (read from ?batchId= or enter manually) */}
+                    <div>
+                        <label className="block text-sm mb-1">Batch ID</label>
+                        <Input disabled placeholder="Batch ID (or provide ?batchId= in URL)" value={batchId} onChange={(e) => setBatchId((e.target as HTMLInputElement).value)} />
+                        {errors.batchId && <div className="text-sm text-destructive mt-1">{errors.batchId}</div>}
+                    </div>
                     {/* Spesifikasi kontainer (PDF) */}
                     <div>
                         <label className="block text-sm mb-1">Spesifikasi kontainer (PDF)</label>
@@ -98,11 +151,12 @@ export default function ExporterQcReportPage() {
                     <div>
                         <label className="block text-sm mb-1">Status akhir batch</label>
                         <select value={status} onChange={(e) => setStatus(e.target.value as any)} className="w-full rounded px-4 py-3">
-                            <option value="shipping">Shipping</option>
                             <option value="accepted">Accepted</option>
                             <option value="rejected">Rejected</option>
                         </select>
                     </div>
+
+                    {submitMessage && <div className="text-sm mt-2">{submitMessage}</div>}
 
                     <Button className="w-full" onClick={handleSubmit}>Kirim Laporan</Button>
                 </CardContent>
