@@ -33,7 +33,7 @@ export default function ExporterDashboard() {
   if (loading) return <div className="text-black text-4xl">Loading...</div>;
 
   return (
-    <div className="p-6 max-w-md mx-auto text-white">
+    <div className="p-6 max-w-md mx-auto text-white min-h-screen">
       <h1 className="text-2xl font-semibold">
         Hello, {me?.name || "IndoShrimp Plant"}
       </h1>
