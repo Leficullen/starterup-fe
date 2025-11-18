@@ -138,7 +138,7 @@ export default function CreateBatch() {
   }
 
   return (
-    <div className="p-6 max-w-md mx-auto text-white">
+    <div className="p-6 max-w-md mx-auto text-white my-10">
       <h1 className="text-2xl font-semibold">Create New Batch</h1>
       <div className="lg:flex lg:items-center">
         <Card className="mt-4 bg-white/10 border-white/20 backdrop-blur-xl">
