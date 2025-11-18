@@ -26,9 +26,7 @@ export default function ScannerPage() {
 
   const router = useRouter();
 
-  // ---------------------------------------------
   // Load logged-in user before enabling scanner
-  // ---------------------------------------------
   useEffect(() => {
     async function fetchRole() {
       try {
@@ -56,9 +54,7 @@ export default function ScannerPage() {
     return `my_batches_${userId}`;
   }
 
-  // ---------------------------------------------
   // Initialize QR Scanner after role & user loaded
-  // ---------------------------------------------
   useEffect(() => {
     if (!roleLoaded || !userId) return;
     if (!videoRef.current || scannerRef.current) return;
@@ -98,31 +94,18 @@ export default function ScannerPage() {
 
           const batch = res.data;
 
-          // Per-user storage
-          const key = localKey();
-          const saved = JSON.parse(localStorage.getItem(key) || "[]");
 
-          // Check duplicate
-          const exists = saved.some((item: any) => item.id === batch.id);
-          if (exists) {
-            showErrorMessage("This batch has already been added.");
-            setIsProcessing(false);
-            return;
-          }
-
-          // Save batch
-          saved.push(batch);
-          localStorage.setItem(key, JSON.stringify(saved));
+          scanner.stop();
+          router.push(`/${role}/qc-report?batchId=${batch.id}`);
 
           // DUMMY HISTORY INFORMATION (ONLY RECEIVED FOR NOW)
           await addBatchHistory(batch.id, "Received batch", role!, userId!);
 
           showSuccessMessage("Batch added successfully.");
 
-          // Stop camera before navigating
           scanner.stop();
           scannerRef.current = null;
-          router.push(`/${role}`);
+          router.push(`/${role}/qc-report?batchId=${batch.id}`);
         } catch (err: any) {
           showErrorMessage("Network error: " + err.message);
         }
@@ -148,32 +131,25 @@ export default function ScannerPage() {
     };
   }, [roleLoaded, role, userId, isProcessing]);
 
-  // ---------------------------------------------
   // Cancel button
-  // ---------------------------------------------
   function handleCancel() {
     scannerRef.current?.stop();
     router.push(role ? `/${role}` : "/");
   }
 
-  // ---------------------------------------------
   // Toast message helpers
-  // ---------------------------------------------
   function showSuccessMessage(msg: string) {
     setMessageType("success");
     setUiMessage(msg);
-    setTimeout(() => setUiMessage(null), 2000);
+    setTimeout(() => setUiMessage(null), 3000);
   }
 
   function showErrorMessage(msg: string) {
     setMessageType("error");
     setUiMessage(msg);
-    setTimeout(() => setUiMessage(null), 2000);
+    setTimeout(() => setUiMessage(null), 3000);
   }
 
-  // ---------------------------------------------
-  // UI Rendering
-  // ---------------------------------------------
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Toast Modal */}

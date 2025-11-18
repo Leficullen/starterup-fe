@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getMe, getBatches } from "@/lib/api";
 import FarmerCard from "@/components/ui/farmerCard";
+import { GET } from "@/lib/api";
 
 export default function FarmerDashboard() {
   const [loading, setLoading] = useState(true);
