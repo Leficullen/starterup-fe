@@ -1,0 +1,8 @@
+services:
+  starter-up-fe-dev:
+    image: jocimsus/starter-up-fe:dev
+    container_name: starter-up-fe-dev
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    ports:
+      - "3131:3131"
