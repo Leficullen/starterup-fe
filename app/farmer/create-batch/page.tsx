@@ -1,35 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select"
+import { useRouter } from "next/navigation";
+import QRCode from "react-qr-code";
+import { createBatch, getMe } from "@/lib/api";
+import { v4 as uuidv4 } from "uuid";
 
 export default function CreateBatch() {
-  // Date in dd/mm/yyyy format (text input that inserts slashes)
   const [dateCaught, setDateCaught] = useState<string>("");
-
-  // Coordinates (strings to allow empty value while typing)
   const [lat, setLat] = useState<string>("");
   const [lng, setLng] = useState<string>("");
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [errors, setErrors] = useState<{ date?: string; coords?: string }>(
-    {}
-  );
+  const [errors, setErrors] = useState<{ date?: string; coords?: string }>({});
+  const [loading, setLoading] = useState(false);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [farmerId, setFarmerId] = useState<string | null>(null);
+  const router = useRouter();
+
+  // LOAD FARMER ID
+  useEffect(() => {
+    getMe().then((profile) => {
+      if (profile && profile.id) {
+        setFarmerId(profile.id);
+      }
+    });
+  }, []);
 
   // Format user input into dd/mm/yyyy as they type (non-invasive)
   function formatDateInput(input: string) {
     const digits = input.replace(/\D/g, "").slice(0, 8);
     const parts: string[] = [];
-    if (digits.length > 0) parts.push(digits.slice(0, Math.min(2, digits.length)));
-    if (digits.length > 2) parts.push(digits.slice(2, Math.min(4, digits.length)));
+    if (digits.length > 0)
+      parts.push(digits.slice(0, Math.min(2, digits.length)));
+    if (digits.length > 2)
+      parts.push(digits.slice(2, Math.min(4, digits.length)));
     if (digits.length > 4) parts.push(digits.slice(4));
     return parts.join("/");
   }
@@ -75,7 +83,6 @@ export default function CreateBatch() {
       }
     }
 
-    // coords presence and range
     if (!lat || !lng) {
       next.coords = "Latitude and longitude are required";
     } else {
@@ -92,15 +99,42 @@ export default function CreateBatch() {
     return Object.keys(next).length === 0;
   }
 
-  function handleGenerate() {
+  async function handleGenerate() {
     if (!validateForm()) {
       return;
     }
 
-    // TODO: wire actual generation logic. For now just clear errors and log
+    if (!farmerId) {
+      setErrors({ date: "Unable to get farmer profile" });
+      return;
+    }
+
+    setLoading(true);
     setErrors({});
-    // eslint-disable-next-line no-console
-    console.log("Generate batch", { dateCaught, lat, lng });
+
+    const uuid = uuidv4();
+
+    const [day, month, year] = dateCaught.split("/");
+    const isoDate = new Date(`${year}-${month}-${day}`).toISOString();
+
+    const res = await createBatch({
+      qr_code: uuid,
+      catch_time: isoDate,
+      metadata: {
+        species: "Tilapia",
+        pond_id: `${lat},${lng}`,
+      },
+    });
+
+    if (res.ok && res.batch) {
+      setQrCode(uuid);
+      setSuccessMessage("Batch created successfully! QR Code generated.");
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } else {
+      setErrors({ date: res.message || "Failed to create batch" });
+    }
+
+    setLoading(false);
   }
 
   return (
@@ -119,10 +153,16 @@ export default function CreateBatch() {
                 className="bg-white/20"
                 value={dateCaught}
                 aria-invalid={errors.date ? "true" : undefined}
-                onChange={(e) => setDateCaught(formatDateInput((e.target as HTMLInputElement).value))}
+                onChange={(e) =>
+                  setDateCaught(
+                    formatDateInput((e.target as HTMLInputElement).value)
+                  )
+                }
               />
               {errors.date && (
-                <div className="text-sm text-destructive mt-1">{errors.date}</div>
+                <div className="text-sm text-destructive mt-1">
+                  {errors.date}
+                </div>
               )}
             </div>
 
@@ -149,7 +189,9 @@ export default function CreateBatch() {
                 />
               </div>
               {errors.coords && (
-                <div className="text-sm text-destructive mt-1">{errors.coords}</div>
+                <div className="text-sm text-destructive mt-1">
+                  {errors.coords}
+                </div>
               )}
             </div>
 
@@ -159,20 +201,51 @@ export default function CreateBatch() {
               </Button>
               <div className="flex-1 text-sm text-white/80 pl-2">
                 {lat && lng ? (
-                  <span>Current: {lat}, {lng}</span>
+                  <span>
+                    Current: {lat}, {lng}
+                  </span>
                 ) : (
-                  <span className="text-sm text-muted-foreground">No coordinates</span>
+                  <span className="text-sm text-muted-foreground">
+                    No coordinates
+                  </span>
                 )}
               </div>
             </div>
 
-            {locationError && <div className="text-sm text-destructive mt-2">{locationError}</div>}
+            {locationError && (
+              <div className="text-sm text-destructive mt-2">
+                {locationError}
+              </div>
+            )}
 
-            <Button className="w-full" onClick={handleGenerate}>Generate Batch + QR</Button>
+            <Button
+              className="w-full"
+              onClick={handleGenerate}
+              disabled={loading}
+            >
+              {loading ? "Generating..." : "Generate Batch + QR"}
+            </Button>
+
+            {/* Success Message */}
+            {successMessage && (
+              <div className="text-sm text-green-500 mt-2 text-center">
+                {successMessage}
+              </div>
+            )}
+
+            {/* QR Code Display */}
+            {qrCode && (
+              <div className="flex flex-col items-center mt-4">
+                <p className="text-sm text-white/80 mb-2">Scan this QR Code:</p>
+                <div className="bg-white p-2 rounded">
+                  <QRCode value={qrCode} size={128} />
+                </div>
+                <p className="text-xs text-white/60 mt-2">{qrCode}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
-
     </div>
   );
 }
