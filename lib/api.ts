@@ -224,3 +224,26 @@ export async function addBatchHistory(
     saveMockBatchHistory();
     return { ok: true };
 }
+
+// saya butuh function patch
+export async function PATCH(path: string, body: any) {
+    const token = localStorage.getItem(
+        "authToken"
+    );
+    const headers: any = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+    };
+    const init: any = {
+        method: "PATCH",
+        headers,
+    };
+    // ngikut sj
+    if (body instanceof FormData) {
+        delete headers["Content-Type"];
+        init.body = body;
+    } else {
+        init.body = JSON.stringify(body);
+    }
+    return fetch(`${API_URL}${path}`, init);
+}
