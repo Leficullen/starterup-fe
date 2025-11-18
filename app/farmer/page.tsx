@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -43,9 +44,9 @@ export default function FarmerDashboard() {
         <p className="text-background">Role: Farmer</p>
       </div>
 
-      <div className="flex gap-4 mt-6 w-full">
-        <Link href="/farmer/create-batch" className="w-full">
-          <Button className="bg-background shadow-lg border-2 rounded-lg w-full md:w-fit flex text-base md:text-lg text-primary hover:text-background hover:bg-primary font-bold border-primary">
+      <div className="grid grid-cols-2 gap-4 mt-6">
+        <Link href="/farmer/create-batch">
+          <Button className="bg-background shadow-lg  border-2 rounded-lg w-fit px-[20%] text-lg text-primary hover:text-background hover:bg-primary font-bold border-primary ">
             + Create Batch
           </Button>
         </Link>
