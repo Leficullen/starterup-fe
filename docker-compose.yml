@@ -5,4 +5,4 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     ports:
-      - "3131:3131"
+      - "3131:3000"
