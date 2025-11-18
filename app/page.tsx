@@ -101,8 +101,8 @@ export default function Home() {
             </h3>
             <div>
               <ul className="list-disc mt-3 md:mt-0 md:ml-16 mx-[15px] text-red-800">
-                {Problems.map((problem) => (
-                  <li className="text-sm md:text-lg">{problem}</li>
+                {Problems.map((problem, index) => (
+                  <li className="text-sm md:text-lg" key={index}>{problem}</li>
                 ))}
               </ul>
             </div>

@@ -15,10 +15,10 @@ export default function FarmerDashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
-          const res = await GET(`/batches`);
-          const data = await res.json()
-          console.log(data.data)
-          setBatches(data.data)
+      const res = await GET(`/batches`);
+      const data = await res.json()
+      console.log(data.data)
+      setBatches(data.data)
     }
     fetchData()
   }, [])
