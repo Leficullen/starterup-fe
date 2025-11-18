@@ -1,11 +1,11 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
-import ClientLayout from "./ClientLayout";
+import Navbar from "@/components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "TraceShrimp",
+  title: "Shrimp Linkers",
   description: "End-to-end traceability for shrimp supply chain.",
 };
 
@@ -16,8 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <ClientLayout>{children}</ClientLayout>
+      <body className={` ${inter.className}`}>
+        <Navbar />
+        <div>{children}</div>
       </body>
     </html>
   );

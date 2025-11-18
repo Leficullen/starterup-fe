@@ -1,11 +1,10 @@
 "use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { getMe } from "@/lib/api";
+import { useState, useEffect } from "react";
 
 export default function CollectorDashboard() {
   const [loading, setLoading] = useState(true);
@@ -46,7 +45,6 @@ export default function CollectorDashboard() {
             📷 Scan QR
           </Button>
         </Link>
-
         <Button variant="secondary" className="h-24 w-full text-lg" disabled>
           Received List
         </Button>
