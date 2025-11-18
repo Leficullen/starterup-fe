@@ -18,7 +18,7 @@ export default function Home() {
       role: "Farmer",
       title: "Harvesting Shrimp",
       description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, facere sequi blanditiis porro suscipit tempore.",
+        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, facere sequi blanditiis p.",
     },
     {
       role: "Collector",
